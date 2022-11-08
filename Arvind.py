@@ -158,6 +158,9 @@ def bfs(G, start):
 def is_anisotropic(u, v, d, cell_sizes):
     return d[(u,v)] not in (0, cell_sizes[v])
 
+def is_heterogeneous(u, d, cell_size):
+    return d[(u, u)] not in (0, cell_size[u] - 1)
+
 list(bfs(nx.cycle_graph(6), range(6)))
 is_amenable(X1)
 #c, p = colour_refinement(X1)
