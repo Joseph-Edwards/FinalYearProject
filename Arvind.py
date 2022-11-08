@@ -155,6 +155,10 @@ def bfs(G, start):
             if v not in visited and v not in visit:
                 visit.append(v)
 
+def is_anisotropic(u, v, d, cell_sizes):
+    return d[(u,v)] not in (0, cell_sizes[v])
+
+list(bfs(nx.cycle_graph(6), range(6)))
 is_amenable(X1)
 #c, p = colour_refinement(X1)
 #nx.draw_circular(X1, node_color = list(c.values()), labels = c)
