@@ -79,8 +79,6 @@ def colour_refinement(G):
 def first_last(array,key):
     return (array.index(key), len(array) - array[::-1].index(key) - 1)
 
-#%%
-
 def augmented_cell_graph(G):
     # Get stable colouring
     C, P = colour_refinement(G)
@@ -120,6 +118,8 @@ def find_edges(X, G, C):
     adj_list = d_ij.keys() - {C[u]}
     return adj_list, d_ij
 
+#%%
+
 def is_amenable(G):
     aug_G, d_ij, C = augmented_cell_graph(G)
     V = list(aug_G.nodes)
@@ -129,11 +129,14 @@ def is_amenable(G):
         u, v = uv
         d = d_ij[(u, v)]
         if u == v:
+            # Check A
+
             u_size = cell_size[u]
             # Empty, Kn, mK2, complement of mK2, C5
             if not (d in (0, u_size - 1, 1, u_size - 2) or (d == 2 and u_size == 5)):
                 return False
         else:
+            # Check B
             u_size = cell_size[u]
             v_size = cell_size[v]
             # Empty, Kmn, sK1t, sKt1, complement of sK1t, complement of sKt1
@@ -141,6 +144,16 @@ def is_amenable(G):
                 return False
     return True
 
+def bfs(G, start):
+    visit = [start]
+    visited = set()
+    while visit:
+        u = visit.pop(0)
+        visited.add(u)
+        yield u
+        for v in G[u]:
+            if v not in visited and v not in visit:
+                visit.append(v)
 
 is_amenable(X1)
 #c, p = colour_refinement(X1)
