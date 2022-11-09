@@ -111,11 +111,13 @@ def find_edges(X, G, C):
     # Get the colour class of each neighbour
     adjacent_colours = [C[v] for v in G[u]]
 
+    unique_colours = set(adjacent_colours)
+
     # Count the number of occurences of each neighbour
     d_ij = {C[u]:0}
-    d_ij |= {i:adjacent_colours.count(i) for i in adjacent_colours}
+    d_ij |= {i:adjacent_colours.count(i) for i in unique_colours}
 
-    adj_list = d_ij.keys() - {C[u]}
+    adj_list = unique_colours - {C[u]} # Can there be loops?
     return adj_list, d_ij
 
 #%%
@@ -123,14 +125,12 @@ def find_edges(X, G, C):
 def is_amenable(G):
     aug_G, d_ij, C = augmented_cell_graph(G)
     V = list(aug_G.nodes)
-    cell_size = {v: len(C[v]) for v in V}
+    cell_size = {v: len(C[v]) for v in V} # Make consistent names
 
-    for uv in d_ij.keys():
-        u, v = uv
+    for u, v in d_ij.keys():
         d = d_ij[(u, v)]
         if u == v:
             # Check A
-
             u_size = cell_size[u]
             # Empty, Kn, mK2, complement of mK2, C5
             if not (d in (0, u_size - 1, 1, u_size - 2) or (d == 2 and u_size == 5)):
@@ -148,7 +148,7 @@ def bfs(G, start):
     visit = [start]
     visited = set()
     while visit:
-        u = visit.pop(0)
+        u = visit.pop(0) # Change this to an actual Queue
         visited.add(u)
         yield u
         for v in G[u]:
@@ -161,7 +161,7 @@ def is_anisotropic(u, v, d, cell_sizes):
 def is_heterogeneous(u, d, cell_size):
     return d[(u, u)] not in (0, cell_size[u] - 1)
 
-list(bfs(nx.cycle_graph(6), range(6)))
+# list(bfs(nx.cycle_graph(6), range(6)))
 is_amenable(X1)
 #c, p = colour_refinement(X1)
 #nx.draw_circular(X1, node_color = list(c.values()), labels = c)
