@@ -142,29 +142,87 @@ def is_amenable(G):
             # Empty, Kmn, sK1t, sKt1, complement of sK1t, complement of sKt1
             if not (d in (0, v_size, 1, v_size/u_size, v_size - 1, v_size - v_size/u_size)):
                 return False
+    try:
+        comps = anisotropic_components(aug_G, d_ij, cell_size)
+    except AssertionError:
+        print("Fails H")
+        return False
+
+    for comp, root in comps:
+        if not satisfies_monotonicity(comp, root, cell_size):
+            print("Fails G")
+            return False
     return True
 
-def bfs(G, start):
-    visit = [start]
+def bfs(G, root):
+    visit = deque([root])
     visited = set()
     while visit:
-        u = visit.pop(0) # Change this to an actual Queue
+        u = visit.popleft()
         visited.add(u)
-        yield u
         for v in G[u]:
-            if v not in visited and v not in visit:
+            if v not in visited:
                 visit.append(v)
+                yield (u,v)
 
-def is_anisotropic(u, v, d, cell_sizes):
-    return d[(u,v)] not in (0, cell_sizes[v])
+def anisotropic_components(aug_G, d, cell_size):
+    V = set(aug_G.nodes)
+    components = []
+    while V:
+        root = V.pop()
+        visit = deque([root])
+        seen = {root}
+        component = nx.Graph()
+
+        min_card = cell_size[root]
+        min_card_v = root
+
+        found_het = False
+
+        while visit:
+            u = visit.popleft()
+            card = cell_size[u]
+            if is_heterogeneous(u, d, cell_size):
+                if (not found_het) and card <= min_card:
+                    found_het = True
+                    het_card = card
+                else:
+                    raise AssertionError
+            elif found_het and card < het_card:
+                raise AssertionError
+
+            if card < min_card:
+                min_card = card
+                min_card_v = u
+
+            component.add_node(u)
+            for v in aug_G[u]:
+                if is_anisotropic(u, v, d, cell_size):
+                    component.add_edge(u,v)
+                    if v not in seen:
+                        visit.append(v)
+                        seen |= {v}
+                        V.remove(v)
+        assert(nx.is_tree(component))
+        components.append((component, min_card_v))
+    return components
+
+def satisfies_monotonicity(comp, root, cell_size):
+    for u, v in bfs(comp, root):
+        if cell_size[u] > cell_size[v]:
+            return False
+    return True
+
+def is_anisotropic(u, v, d, cell_size):
+    return d[(u,v)] not in (0, cell_size[v])
 
 def is_heterogeneous(u, d, cell_size):
     return d[(u, u)] not in (0, cell_size[u] - 1)
 
 # list(bfs(nx.cycle_graph(6), range(6)))
-is_amenable(X1)
+is_amenable(nx.barbell_graph(3, 1))
 #c, p = colour_refinement(X1)
 #nx.draw_circular(X1, node_color = list(c.values()), labels = c)
-aug_G, ds, C = augmented_cell_graph(X1)
-nx.draw(aug_G, with_labels = True)
+#aug_G, ds, C = augmented_cell_graph(X1)
+#nx.draw(aug_G, with_labels = True)
 
