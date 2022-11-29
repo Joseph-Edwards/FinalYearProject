@@ -9,6 +9,11 @@ from collections import deque
 from itertools import groupby, product
 import networkx as nx
 from networkx.drawing.nx_pydot import graphviz_layout
+import cProfile
+import pstats
+from pstats import SortKey
+import timeit
+import matplotlib.pyplot as plt
 
 # =============================================================================
 # Test Graphs
@@ -330,7 +335,7 @@ def is_amenable(G):
 # =============================================================================
 
 
-test_graph = G3
+test_graph = nx.erdos_renyi_graph(50, 0.1)
 
 Cols, _ = colour_refinement(test_graph)
 # https://graphviz.org/docs/layouts/
@@ -338,6 +343,43 @@ pos = graphviz_layout(test_graph, prog="circo")
 nx.draw(test_graph, pos=pos, with_labels=True, node_color=list(Cols.values()))
 
 is_amenable(test_graph)
+
+# =============================================================================
+# Timing
+# =============================================================================
+
+def profile():
+    cProfile.run('is_amenable(test_graph)', 'calls')
+    p = pstats.Stats('calls')
+    p.strip_dirs().sort_stats(SortKey.TIME).print_stats()
+
+profile()
+
+
+Ns = 200
+step = 10
+reps = 5
+runs = 5
+
+# Random graphs
+tests = [[nx.erdos_renyi_graph(n, 0.5) for i in range(reps)] for n in range(1, Ns, step)]
+random_times = [[timeit.timeit(f'is_amenable(tests[{i}][{j}])', globals=globals(), number = runs)/runs for j in range(reps)] for i, _ in enumerate(range(1, Ns, step))]
+random_avg_times = [sum(t)/reps for t in random_times]
+random_1 = plt.plot(range(1, Ns, step), random_times, 'x')
+plt.show()
+random_2 = plt.plot(range(1, Ns, step), random_avg_times, 'x')
+plt.show()
+
+# Random trees
+tests = [[nx.random_tree(n) for i in range(reps)] for n in range(1, Ns, step)]
+tree_times = [[timeit.timeit(f'is_amenable(tests[{i}][{j}])', globals=globals(), number = runs)/runs for j in range(reps)] for i, _ in enumerate(range(1, Ns, step))]
+tree_avg_times = [sum(t)/reps for t in tree_times]
+tree_1 = plt.plot(range(1, Ns, step), tree_times, 'x')
+plt.show()
+tree_2 = plt.plot(range(1, Ns, step), tree_avg_times, 'x')
+plt.show()
+
+
 
 # =============================================================================
 # Other notes
