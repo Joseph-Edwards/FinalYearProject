@@ -337,14 +337,30 @@ def is_amenable(G):
 # =============================================================================
 
 
-test_graph = nx.erdos_renyi_graph(50, 0.1)
+dir_path = r'C:\\Users\\josep\\OneDrive - University of St Andrews\\Documents\\St Andrews\\Y5\\Project\\Code\\Amenable\\Test Graphs'
+bad_files = []
 
-Cols, _ = colour_refinement(test_graph)
+# Find non-amenable non-regular graphs with trivial automorphism group
+for path in os.listdir(dir_path):
+    gs = nx.read_graph6(path)
+    if not all(is_amenable(g) for g in gs):
+        print(path)
+        bad_files.append(path)
+
+bad_graphs = [g for bad_file in bad_files for g in nx.read_graph6(bad_file) if not is_amenable(g)]
+
+# Draw the graphs with colourings
 # https://graphviz.org/docs/layouts/
-pos = graphviz_layout(test_graph, prog="circo")
-nx.draw(test_graph, pos=pos, with_labels=True, node_color=list(Cols.values()))
+Cols = []
 
-is_amenable(test_graph)
+for g in bad_graphs:
+    Col, _ = colour_refinement(g)
+    Cols.append(Col)
+
+for i, g in enumerate(bad_graphs):
+    pos = graphviz_layout(g, prog="circo")
+    nx.draw(g, pos=pos, with_labels=True, node_color=list(Cols[i].values()))
+    plt.show()
 
 # =============================================================================
 # Timing
