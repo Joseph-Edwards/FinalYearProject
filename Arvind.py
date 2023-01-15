@@ -427,5 +427,7 @@ plt.show()
 # TODO: Profile. Consider removing nx
 # TODO: Make speed plots
 # TODO: Throw fun graphs at it
+# TODO: Look at digraohs / skew-symmetric graphs
+# TODO: Asymmetric graphs - Frucht Graph
 
 # TODO (Bonus): Colour anisotropic components
