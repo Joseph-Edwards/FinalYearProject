@@ -14,6 +14,8 @@ import pstats
 from pstats import SortKey
 import timeit
 import matplotlib.pyplot as plt
+from math import log
+import os
 
 # =============================================================================
 # Test Graphs
