@@ -33,10 +33,11 @@ def colour_refinement(G):
         verts_with_col_q = set(P[q])
         D = {v: len(verts_with_col_q & set(N[v])) for v in V}
 
-        # Ordered partition of vertices v sorted lexicographically by (C[v], D[v])
+        # Ordered partition of vertices sorted by (C[v], D[v])
         list.sort(V, key=lambda v: (C[v], D[v]))
-        cols_and_parts = [(k[0], list(g))
-                          for k, g in groupby(V, lambda v: (C[v], D[v]))]
+        cols_and_parts = [
+            (k[0], list(g)) for k, g in groupby(V, lambda v: (C[v], D[v]))
+        ]
         cols_of_parts, B = list(zip(*cols_and_parts))
 
         for i in range(c_min, c_max + 1):
@@ -166,6 +167,7 @@ def anisotropic_components(aug_G, d, cell_size):
         components.append((component, min_card_vertex))
     return components
 
+
 # =============================================================================
 # Check Monotonicity
 # =============================================================================
@@ -176,6 +178,7 @@ def satisfies_monotonicity(component, root, cell_size):
         if cell_size[aug_u] > cell_size[aug_v]:
             return False
     return True
+
 
 # =============================================================================
 # Amenability Testing
@@ -255,6 +258,6 @@ def jellyfishify(G, k):
     J_k_G.add_edges_from(G.edges)
     n = G.order()
     for v in G:
-        for i in range(1, k+1):
-            J_k_G.add_edge(v+(i-1)*n, v+i*n)
+        for i in range(1, k + 1):
+            J_k_G.add_edge(v + (i - 1) * n, v + i * n)
     return J_k_G
