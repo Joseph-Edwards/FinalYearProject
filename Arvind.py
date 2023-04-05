@@ -2,7 +2,7 @@
 """
 Created on Tue Oct 25 19:23:23 2022
 
-@author: josep
+@author: Joseph Edwards
 """
 
 from collections import deque
@@ -95,11 +95,10 @@ G3.add_edges_from(E)
 # =============================================================================
 # Colour Refinement
 # =============================================================================
-# TODO: Revisit faster CR. Don't spend too much time on it
 
 
 def first_last(array, key):
-    # Find first and last occurence of an element in a sorted list
+    # Find first and last occurrence of an element in a sorted list
     return (array.index(key), len(array) - array[::-1].index(key) - 1)
 
 
@@ -117,7 +116,7 @@ def colour_refinement(G):
         verts_with_col_q = set(P[q])
         D = {v: len(verts_with_col_q & set(N[v])) for v in V}
 
-        # Ordered partition of vertices v sorted lexographically by (C[v], D[v])
+        # Ordered partition of vertices v sorted lexicographically by (C[v], D[v])
         list.sort(V, key=lambda v: (C[v], D[v]))
         cols_and_parts = [(k[0], list(g))
                           for k, g in groupby(V, lambda v: (C[v], D[v]))]
@@ -155,7 +154,7 @@ def find_edges(col_class, G, C):
 
     unique_colours = set(adjacent_colours)
 
-    # Count the number of occurences of each neighbour
+    # Count the number of occurrences of each neighbour
     d_ij = {C[u]: 0}
     d_ij |= {i: adjacent_colours.count(i) for i in unique_colours}
 
@@ -190,7 +189,6 @@ def augmented_cell_graph(G):
 # =============================================================================
 # Find Valid Anisotropic Components
 # =============================================================================
-# TODO: Add definitions
 
 
 def is_anisotropic(u, v, d, cell_size):
@@ -221,14 +219,13 @@ def anisotropic_components(aug_G, d, cell_size):
         while visit:
             aug_u = visit.popleft()
             card = cell_size[aug_u]
-            # TODO: Put this into seperate function
             # Check H
             if is_heterogeneous(aug_u, d, cell_size):
                 if (not found_het) and card <= min_card:
                     found_het = True
                     het_card = card
                 else:
-                    raise AssertionError  # TODO: Make a new assertion class
+                    raise AssertionError
             elif found_het and card < het_card:
                 raise AssertionError
 
@@ -265,7 +262,7 @@ def satisfies_monotonicity(component, root, cell_size):
     return True
 
 # =============================================================================
-# Amenability Testiing
+# Amenability Testing
 # =============================================================================
 
 
@@ -347,7 +344,8 @@ for path in os.listdir(dir_path):
         print(path)
         bad_files.append(path)
 
-bad_graphs = [g for bad_file in bad_files for g in nx.read_graph6(bad_file) if not is_amenable(g)]
+bad_graphs = [g for bad_file in bad_files for g in nx.read_graph6(
+    bad_file) if not is_amenable(g)]
 
 # Draw the graphs with colourings
 # https://graphviz.org/docs/layouts/
@@ -367,18 +365,18 @@ for i, g in enumerate(bad_graphs):
 # =============================================================================
 
 
-
-
 Ns = 400
 step = 10
 reps = 20
 runs = 5
 
 # Random graphs
-tests = [[nx.erdos_renyi_graph(n, 0.5) for i in range(reps)] for n in range(1, Ns, step)]
+tests = [[nx.erdos_renyi_graph(n, 0.5) for i in range(reps)]
+         for n in range(1, Ns, step)]
 am_test = [[is_amenable(g) for g in graphs] for graphs in tests]
 probs = [sum(test)/reps for test in am_test]
-random_times = [[timeit.timeit(f'is_amenable(tests[{i}][{j}])', globals=globals(), number = runs)/runs for j in range(reps)] for i, _ in enumerate(range(1, Ns, step))]
+random_times = [[timeit.timeit(f'is_amenable(tests[{i}][{j}])', globals=globals(
+), number=runs)/runs for j in range(reps)] for i, _ in enumerate(range(1, Ns, step))]
 random_avg_times = [sum(t)/reps for t in random_times]
 random_1 = plt.plot(range(1, Ns, step), random_times, 'x')
 plt.title("Raw Random")
@@ -386,10 +384,12 @@ plt.show()
 random_2 = plt.plot(range(1, Ns, step), random_avg_times, 'x')
 plt.title("Average Random")
 plt.show()
-random_xs = [[(g.number_of_nodes()+g.number_of_edges())*log(g.number_of_nodes()) for g in graphs] for graphs in tests]
+random_xs = [[(g.number_of_nodes()+g.number_of_edges()) *
+              log(g.number_of_nodes()) for g in graphs] for graphs in tests]
 random_3 = plt.plot(random_xs, random_times, 'x')
 plt.title("Adjusted Random")
 plt.show()
+
 
 def profile():
     cProfile.run('is_amenable(tests[-1][-1])', 'calls')
@@ -398,12 +398,14 @@ def profile():
 
 # profile()
 
+
 # Random trees
 tests = [[nx.random_tree(n) for i in range(reps)] for n in range(1, Ns, step)]
 # Quick check
 all(is_amenable(g) for graphs in tests for g in graphs)
 
-tree_times = [[timeit.timeit(f'is_amenable(tests[{i}][{j}])', globals=globals(), number = runs)/runs for j in range(reps)] for i, _ in enumerate(range(1, Ns, step))]
+tree_times = [[timeit.timeit(f'is_amenable(tests[{i}][{j}])', globals=globals(
+), number=runs)/runs for j in range(reps)] for i, _ in enumerate(range(1, Ns, step))]
 tree_avg_times = [sum(t)/reps for t in tree_times]
 tree_1 = plt.plot(range(1, Ns, step), tree_times, 'x')
 plt.title("Raw Tree")
@@ -411,23 +413,8 @@ plt.show()
 tree_2 = plt.plot(range(1, Ns, step), tree_avg_times, 'x')
 plt.title("Average Tree")
 plt.show()
-tree_xs = [[(g.number_of_nodes()+g.number_of_edges())*log(g.number_of_nodes()) for g in graphs] for graphs in tests]
+tree_xs = [[(g.number_of_nodes()+g.number_of_edges()) *
+            log(g.number_of_nodes()) for g in graphs] for graphs in tests]
 tree_3 = plt.plot(tree_xs, tree_times, 'x')
 plt.title("Adjusted Tree")
 plt.show()
-
-
-
-
-
-# =============================================================================
-# Other notes
-# =============================================================================
-# TODO: Consider making some variables global
-# TODO: Profile. Consider removing nx
-# TODO: Make speed plots
-# TODO: Throw fun graphs at it
-# TODO: Look at digraohs / skew-symmetric graphs
-# TODO: Asymmetric graphs - Frucht Graph
-
-# TODO (Bonus): Colour anisotropic components
