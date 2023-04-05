@@ -8,14 +8,6 @@ Created on Tue Oct 25 19:23:23 2022
 from collections import deque
 from itertools import groupby, product
 import networkx as nx
-from networkx.drawing.nx_pydot import graphviz_layout
-import cProfile
-import pstats
-from pstats import SortKey
-import timeit
-import matplotlib.pyplot as plt
-from math import log
-import os
 
 # =============================================================================
 # Colour Refinement
@@ -257,6 +249,7 @@ def is_amenable(G):
 # Jellyfishification
 # =============================================================================
 
+
 def jellyfishify(G, k):
     J_k_G = nx.Graph()
     J_k_G.add_edges_from(G.edges)
@@ -265,93 +258,3 @@ def jellyfishify(G, k):
         for i in range(1, k+1):
             J_k_G.add_edge(v+(i-1)*n, v+i*n)
     return J_k_G
-
-# =============================================================================
-# Testting
-# =============================================================================
-
-
-# dir_path = r'C:\\Users\\josep\\OneDrive - University of St Andrews\\Documents\\St Andrews\\Y5\\Project\\Code\\Amenable\\Test Graphs'
-# bad_files = []
-
-# # Find non-amenable non-regular graphs with trivial automorphism group
-# for path in os.listdir(dir_path):
-#     gs = nx.read_graph6(path)
-#     if not all(is_amenable(g) for g in gs):
-#         print(path)
-#         bad_files.append(path)
-
-# bad_graphs = [g for bad_file in bad_files for g in nx.read_graph6(
-#     bad_file) if not is_amenable(g)]
-
-# # Draw the graphs with colourings
-# # https://graphviz.org/docs/layouts/
-# Cols = []
-
-# for g in bad_graphs:
-#     Col, _ = colour_refinement(g)
-#     Cols.append(Col)
-
-# for i, g in enumerate(bad_graphs):
-#     pos = graphviz_layout(g, prog="circo")
-#     nx.draw(g, pos=pos, with_labels=True, node_color=list(Cols[i].values()))
-#     plt.show()
-
-# =============================================================================
-# Timing
-# =============================================================================
-
-
-# Ns = 400
-# step = 10
-# reps = 20
-# runs = 5
-
-# # Random graphs
-# tests = [[nx.erdos_renyi_graph(n, 0.5) for i in range(reps)]
-#          for n in range(1, Ns, step)]
-# am_test = [[is_amenable(g) for g in graphs] for graphs in tests]
-# probs = [sum(test)/reps for test in am_test]
-# random_times = [[timeit.timeit(f'is_amenable(tests[{i}][{j}])', globals=globals(
-# ), number=runs)/runs for j in range(reps)] for i, _ in enumerate(range(1, Ns, step))]
-# random_avg_times = [sum(t)/reps for t in random_times]
-# random_1 = plt.plot(range(1, Ns, step), random_times, 'x')
-# plt.title("Raw Random")
-# plt.show()
-# random_2 = plt.plot(range(1, Ns, step), random_avg_times, 'x')
-# plt.title("Average Random")
-# plt.show()
-# random_xs = [[(g.number_of_nodes()+g.number_of_edges()) *
-#               log(g.number_of_nodes()) for g in graphs] for graphs in tests]
-# random_3 = plt.plot(random_xs, random_times, 'x')
-# plt.title("Adjusted Random")
-# plt.show()
-
-
-# def profile():
-#     cProfile.run('is_amenable(tests[-1][-1])', 'calls')
-#     p = pstats.Stats('calls')
-#     p.strip_dirs().sort_stats(SortKey.CUMMULATIVE).print_stats()
-
-# # profile()
-
-
-# # Random trees
-# tests = [[nx.random_tree(n) for i in range(reps)] for n in range(1, Ns, step)]
-# # Quick check
-# all(is_amenable(g) for graphs in tests for g in graphs)
-
-# tree_times = [[timeit.timeit(f'is_amenable(tests[{i}][{j}])', globals=globals(
-# ), number=runs)/runs for j in range(reps)] for i, _ in enumerate(range(1, Ns, step))]
-# tree_avg_times = [sum(t)/reps for t in tree_times]
-# tree_1 = plt.plot(range(1, Ns, step), tree_times, 'x')
-# plt.title("Raw Tree")
-# plt.show()
-# tree_2 = plt.plot(range(1, Ns, step), tree_avg_times, 'x')
-# plt.title("Average Tree")
-# plt.show()
-# tree_xs = [[(g.number_of_nodes()+g.number_of_edges()) *
-#             log(g.number_of_nodes()) for g in graphs] for graphs in tests]
-# tree_3 = plt.plot(tree_xs, tree_times, 'x')
-# plt.title("Adjusted Tree")
-# plt.show()
