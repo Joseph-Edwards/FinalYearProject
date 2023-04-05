@@ -18,81 +18,6 @@ from math import log
 import os
 
 # =============================================================================
-# Test Graphs
-# =============================================================================
-
-# Nice looking graph from colour refinement website
-G1 = nx.Graph()
-G1.add_nodes_from(range(1, 21))
-G1.add_edges_from([(6, 7),
-                   (7, 8),
-                   (8, 9),
-                   (9, 10),
-                   (10, 11),
-                   (11, 12),
-                   (12, 13),
-                   (13, 14),
-                   (14, 15),
-                   (15, 9),
-                   (15, 13),
-                   (16, 13),
-                   (17, 18),
-                   (18, 19),
-                   (19, 20)
-                   ])
-
-# P3 on top of P5 (looks like a cross)
-G2 = nx.Graph()
-G2.add_nodes_from(range(1, 7))
-G2.add_edges_from([
-    (1, 2),
-    (1, 3),
-    (2, 4),
-    (2, 5),
-    (2, 6),
-    (3, 7)
-])
-
-# K5 with K3 lollipops off each vertex
-E = [[0, 1],
-     [0, 2],
-     [1, 2],
-     [2, 3],
-     [3, 20],
-     [4, 5],
-     [4, 6],
-     [5, 6],
-     [6, 7],
-     [7, 21],
-     [8, 9],
-     [8, 10],
-     [9, 10],
-     [10, 11],
-     [11, 22],
-     [12, 13],
-     [12, 14],
-     [13, 14],
-     [14, 15],
-     [15, 23],
-     [16, 17],
-     [16, 18],
-     [17, 18],
-     [18, 19],
-     [19, 24],
-     [20, 21],
-     [20, 22],
-     [20, 23],
-     [20, 24],
-     [21, 22],
-     [21, 23],
-     [21, 24],
-     [22, 23],
-     [22, 24],
-     [23, 24]]
-G3 = nx.Graph()
-G3.add_edges_from(E)
-
-# =============================================================================
 # Colour Refinement
 # =============================================================================
 
@@ -138,7 +63,7 @@ def colour_refinement(G):
             P[b] = B_current                        # New colouring
             for v in B_current:
                 C[v] = b
-    return C, P
+    return C, {v: P[v] for v in set(C.values())}
 
 # =============================================================================
 # Create Augmented Cell Graph
@@ -165,16 +90,15 @@ def find_edges(col_class, G, C):
 def augmented_cell_graph(G):
     # Get stable colouring
     C, P = colour_refinement(G)
-    stable_col_classes = {v: P[v] for v in set(C.values())}
 
     # Vertices of C* are colours used in (G, C)
-    aug_V = stable_col_classes.keys()
+    aug_V = P.keys()
 
     # Make the adjacency list of  aug_G and find d_ijs
     adj_list = {}   # vertex: [neighbours]
     d_ij = {}       # (i, j): d_ij
     for aug_u in aug_V:
-        edges, ds = find_edges(stable_col_classes[aug_u], G, C)
+        edges, ds = find_edges(P[aug_u], G, C)
         adj_list[aug_u] = edges
         for aug_v, d in ds.items():
             d_ij[(aug_u, aug_v)] = d
@@ -184,7 +108,7 @@ def augmented_cell_graph(G):
     aug_G.add_nodes_from(aug_V)
     for aug_u, nbs in adj_list.items():
         aug_G.add_edges_from(product([aug_u], nbs))
-    return aug_G, d_ij, stable_col_classes
+    return aug_G, d_ij, P
 
 # =============================================================================
 # Find Valid Anisotropic Components
@@ -329,92 +253,93 @@ def is_amenable(G):
             return False
     return True
 
+
 # =============================================================================
 # Testting
 # =============================================================================
 
 
-dir_path = r'C:\\Users\\josep\\OneDrive - University of St Andrews\\Documents\\St Andrews\\Y5\\Project\\Code\\Amenable\\Test Graphs'
-bad_files = []
+# dir_path = r'C:\\Users\\josep\\OneDrive - University of St Andrews\\Documents\\St Andrews\\Y5\\Project\\Code\\Amenable\\Test Graphs'
+# bad_files = []
 
-# Find non-amenable non-regular graphs with trivial automorphism group
-for path in os.listdir(dir_path):
-    gs = nx.read_graph6(path)
-    if not all(is_amenable(g) for g in gs):
-        print(path)
-        bad_files.append(path)
+# # Find non-amenable non-regular graphs with trivial automorphism group
+# for path in os.listdir(dir_path):
+#     gs = nx.read_graph6(path)
+#     if not all(is_amenable(g) for g in gs):
+#         print(path)
+#         bad_files.append(path)
 
-bad_graphs = [g for bad_file in bad_files for g in nx.read_graph6(
-    bad_file) if not is_amenable(g)]
+# bad_graphs = [g for bad_file in bad_files for g in nx.read_graph6(
+#     bad_file) if not is_amenable(g)]
 
-# Draw the graphs with colourings
-# https://graphviz.org/docs/layouts/
-Cols = []
+# # Draw the graphs with colourings
+# # https://graphviz.org/docs/layouts/
+# Cols = []
 
-for g in bad_graphs:
-    Col, _ = colour_refinement(g)
-    Cols.append(Col)
+# for g in bad_graphs:
+#     Col, _ = colour_refinement(g)
+#     Cols.append(Col)
 
-for i, g in enumerate(bad_graphs):
-    pos = graphviz_layout(g, prog="circo")
-    nx.draw(g, pos=pos, with_labels=True, node_color=list(Cols[i].values()))
-    plt.show()
+# for i, g in enumerate(bad_graphs):
+#     pos = graphviz_layout(g, prog="circo")
+#     nx.draw(g, pos=pos, with_labels=True, node_color=list(Cols[i].values()))
+#     plt.show()
 
 # =============================================================================
 # Timing
 # =============================================================================
 
 
-Ns = 400
-step = 10
-reps = 20
-runs = 5
+# Ns = 400
+# step = 10
+# reps = 20
+# runs = 5
 
-# Random graphs
-tests = [[nx.erdos_renyi_graph(n, 0.5) for i in range(reps)]
-         for n in range(1, Ns, step)]
-am_test = [[is_amenable(g) for g in graphs] for graphs in tests]
-probs = [sum(test)/reps for test in am_test]
-random_times = [[timeit.timeit(f'is_amenable(tests[{i}][{j}])', globals=globals(
-), number=runs)/runs for j in range(reps)] for i, _ in enumerate(range(1, Ns, step))]
-random_avg_times = [sum(t)/reps for t in random_times]
-random_1 = plt.plot(range(1, Ns, step), random_times, 'x')
-plt.title("Raw Random")
-plt.show()
-random_2 = plt.plot(range(1, Ns, step), random_avg_times, 'x')
-plt.title("Average Random")
-plt.show()
-random_xs = [[(g.number_of_nodes()+g.number_of_edges()) *
-              log(g.number_of_nodes()) for g in graphs] for graphs in tests]
-random_3 = plt.plot(random_xs, random_times, 'x')
-plt.title("Adjusted Random")
-plt.show()
-
-
-def profile():
-    cProfile.run('is_amenable(tests[-1][-1])', 'calls')
-    p = pstats.Stats('calls')
-    p.strip_dirs().sort_stats(SortKey.CUMMULATIVE).print_stats()
-
-# profile()
+# # Random graphs
+# tests = [[nx.erdos_renyi_graph(n, 0.5) for i in range(reps)]
+#          for n in range(1, Ns, step)]
+# am_test = [[is_amenable(g) for g in graphs] for graphs in tests]
+# probs = [sum(test)/reps for test in am_test]
+# random_times = [[timeit.timeit(f'is_amenable(tests[{i}][{j}])', globals=globals(
+# ), number=runs)/runs for j in range(reps)] for i, _ in enumerate(range(1, Ns, step))]
+# random_avg_times = [sum(t)/reps for t in random_times]
+# random_1 = plt.plot(range(1, Ns, step), random_times, 'x')
+# plt.title("Raw Random")
+# plt.show()
+# random_2 = plt.plot(range(1, Ns, step), random_avg_times, 'x')
+# plt.title("Average Random")
+# plt.show()
+# random_xs = [[(g.number_of_nodes()+g.number_of_edges()) *
+#               log(g.number_of_nodes()) for g in graphs] for graphs in tests]
+# random_3 = plt.plot(random_xs, random_times, 'x')
+# plt.title("Adjusted Random")
+# plt.show()
 
 
-# Random trees
-tests = [[nx.random_tree(n) for i in range(reps)] for n in range(1, Ns, step)]
-# Quick check
-all(is_amenable(g) for graphs in tests for g in graphs)
+# def profile():
+#     cProfile.run('is_amenable(tests[-1][-1])', 'calls')
+#     p = pstats.Stats('calls')
+#     p.strip_dirs().sort_stats(SortKey.CUMMULATIVE).print_stats()
 
-tree_times = [[timeit.timeit(f'is_amenable(tests[{i}][{j}])', globals=globals(
-), number=runs)/runs for j in range(reps)] for i, _ in enumerate(range(1, Ns, step))]
-tree_avg_times = [sum(t)/reps for t in tree_times]
-tree_1 = plt.plot(range(1, Ns, step), tree_times, 'x')
-plt.title("Raw Tree")
-plt.show()
-tree_2 = plt.plot(range(1, Ns, step), tree_avg_times, 'x')
-plt.title("Average Tree")
-plt.show()
-tree_xs = [[(g.number_of_nodes()+g.number_of_edges()) *
-            log(g.number_of_nodes()) for g in graphs] for graphs in tests]
-tree_3 = plt.plot(tree_xs, tree_times, 'x')
-plt.title("Adjusted Tree")
-plt.show()
+# # profile()
+
+
+# # Random trees
+# tests = [[nx.random_tree(n) for i in range(reps)] for n in range(1, Ns, step)]
+# # Quick check
+# all(is_amenable(g) for graphs in tests for g in graphs)
+
+# tree_times = [[timeit.timeit(f'is_amenable(tests[{i}][{j}])', globals=globals(
+# ), number=runs)/runs for j in range(reps)] for i, _ in enumerate(range(1, Ns, step))]
+# tree_avg_times = [sum(t)/reps for t in tree_times]
+# tree_1 = plt.plot(range(1, Ns, step), tree_times, 'x')
+# plt.title("Raw Tree")
+# plt.show()
+# tree_2 = plt.plot(range(1, Ns, step), tree_avg_times, 'x')
+# plt.title("Average Tree")
+# plt.show()
+# tree_xs = [[(g.number_of_nodes()+g.number_of_edges()) *
+#             log(g.number_of_nodes()) for g in graphs] for graphs in tests]
+# tree_3 = plt.plot(tree_xs, tree_times, 'x')
+# plt.title("Adjusted Tree")
+# plt.show()
