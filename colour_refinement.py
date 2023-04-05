@@ -253,6 +253,18 @@ def is_amenable(G):
             return False
     return True
 
+# =============================================================================
+# Jellyfishification
+# =============================================================================
+
+def jellyfishify(G, k):
+    J_k_G = nx.Graph()
+    J_k_G.add_edges_from(G.edges)
+    n = G.order()
+    for v in G:
+        for i in range(1, k+1):
+            J_k_G.add_edge(v+(i-1)*n, v+i*n)
+    return J_k_G
 
 # =============================================================================
 # Testting
