@@ -8,7 +8,7 @@ In this repository, you will find several bits of code that I have written as pa
  asymmetric, planar, non-amenable, non-regular, simple spectrum graph.
  - In [dissertation_examples.py](dissertation_examples.py), you will find some examples of graphs that appear in my project write-up, and the calculation of some of their
  properties.
- - In [RENAME ME](RENAME ME), you will find the code used to enumerate all small graphs, and select the ones with various nice properties.
+ - In [graph_generation.sage](graph_generation.sage), you will find the code used to enumerate all small graphs, and select the ones with various nice properties.
  
  The other files in this repository have various, non-graph-theory related, purposes that you are welcome to browse at your leisure, but won't offer any insight into
  the world of colour refinement!
