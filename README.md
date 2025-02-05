@@ -1,5 +1,5 @@
 # An Introduction To Colour Refinement
-In this repository, you will find several bits of code that I have written as part of my final year project on colour refinement.
+In this repository, you will find several bits of code that I have written as part of my [final year project](Final_Year_Project.pdf) on colour refinement.
 
 ## Contents of the repository
  - In [colour_refinement.py](colour_refinement.py), you will find an implementation of the colour refinement algoirthm presented in [[1]](#1), and an implementation
